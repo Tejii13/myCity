@@ -44,3 +44,8 @@ donné.
 ### Maquette
 
 J'ai mis un input dédié au code postal et un deuxième dédié à la ville. En écrivant le code postale, nous devrions avoir des propositions nous permettant d'y acceder directement. On pourra remplacer les codes postaux par des villes afin de remplir l'input dédié rapidement.
+
+### Choix de l'API
+
+J'ai trouvé cet API qui semble correspondre à ce que l'on veut faire :
+<https://api.insee.fr/catalogue/site/themes/wso2/subthemes/insee/pages/item-info.jag?name=Métadonnées&version=V1&provider=insee>
