@@ -13,17 +13,18 @@
     <title>myCity</title>
   </head>
   <body>
-    <header></header>
     <main class="row mt-5">
       <p class="col-12 ms-2 col-md-5">
         Tapez votre code-postal et choisissez votre ville dans celles qui vous
-        sont proposées!
+        sont proposées, sinon tapez-la dans dans la zone dédiée!
       </p>
       <form class="col-12 offset-md-1 col-md-5">
         <fieldset class="row mx-2">
-          <label class="col-5" for="datalist_codePostal">Code-Postal</label>
+          <label class="col-4 col-md-6" for="input_codePostal"
+            >Code-Postal&nbsp;:</label
+          >
           <input
-            class="col-4 col-md-6"
+            class="col-6 col-md-6"
             name="CodePostal"
             label="Code-Postal"
             placeholder="63000"
@@ -31,11 +32,25 @@
             id="input_codePostal"
             list="datalist_codePostal"
           />
-          <datalist class="col-1" id="datalist_codePostal">
-            <option id="opt1" value="63000">Choix 1</option>
-            <option id="opt2" value="63360">Choix 2</option>
-            <option id="opt3" value="63666">Choix 3</option>
+          <datalist id="datalist_codePostal">
+            <option id="opt1" value="63000" />
+            <option id="opt2" value="63360" />
+            <option id="opt3" value="63666" />
           </datalist>
+          <label class="col-4 col-md-6" for="input_ville">Ville&nbsp;:</label>
+          <input
+            class="col-6 col-md-6"
+            type="text"
+            placeholder="Clermont-Ferrand"
+            name="ville"
+            id="input_ville"
+          />
+          <button
+            class="mt-1 col-6 offset-4 col-md-12 offset-md-0"
+            type="button"
+          >
+            Accéder aux informations
+          </button>
         </fieldset>
       </form>
       <!-- BootSrap -->

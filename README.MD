@@ -38,3 +38,9 @@ donné.
 - le JS correspondant à l'événement choisi ;
 - le choix de l'API, renseigné dans le README ;
 - le JS de la recherche des villes.
+
+## Exercice
+
+### Maquette
+
+J'ai mis un input dédié au code postal et un deuxième dédié à la ville. En écrivant le code postale, nous devrions avoir des propositions nous permettant d'y acceder directement. On pourra remplacer les codes postaux par des villes afin de remplir l'input dédié rapidement.
