@@ -48,4 +48,4 @@ J'ai mis un input dédié au code postal et un deuxième dédié à la ville. En
 ### Choix de l'API
 
 J'ai trouvé cet API qui semble correspondre à ce que l'on veut faire :
-<https://api.insee.fr/catalogue/site/themes/wso2/subthemes/insee/pages/item-info.jag?name=Métadonnées&version=V1&provider=insee>
+<https://api.gouv.fr/les-api/api-geo>
