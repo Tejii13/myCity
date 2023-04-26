@@ -1,29 +1,34 @@
+// Déclaration variables
+let apiUrl; // Lien de pour questionner l'api
+let requete; // Type de recherche
+let contenant; // Contenu de l'input
+
+// Attribution variables à chaque input
 const input_codePostal = document.querySelector("#input_codePostal");
 const input_ville = document.querySelector("#input_ville");
-let apiUrl;
-let codePostalLength;
-let requete;
 
+// Identification informations écrites
 input_codePostal.addEventListener("input", checkCodePostal);
 input_ville.addEventListener("input", checkVille);
 
+// Vérification validité du code postal
 function checkCodePostal(event) {
-  let codePostalLength = event.target.value.length;
-  if (codePostalLength === 5) {
-    requete = event.target.value;
-    apiUrl = `https://geo.api.gouv.fr/communes?codePostal=${requete}`;
-    readApi(apiUrl);
+  // Récupération longueuer code postal
+  if (event.target.value.length === 5) {
+    contenant = event.target.value;
+    requete = "codePostal";
+    apiUrl = `https://geo.api.gouv.fr/communes?codePostal=${contenant}`;
+    readApi(apiUrl, requete);
   }
 }
 function checkVille(event) {
-  let codePostalLength = event.target.value.length;
-  requete = event.target.value;
-  console.log(requete);
-  apiUrl = `https://geo.api.gouv.fr/communes?nom=${requete}`;
-  readApi(apiUrl);
+  contenant = event.target.value;
+  requete = "nom";
+  apiUrl = `https://geo.api.gouv.fr/communes?nom=${contenant}`;
+  readApi(apiUrl, requete);
 }
 
-function readApi(requete) {
+function readApi(apiUrl, requete) {
   console.log(apiUrl);
   fetch(apiUrl)
     .then((response) => {
@@ -33,15 +38,24 @@ function readApi(requete) {
       return response.json();
     })
     .then((data) => {
-      console.log("Ok 1");
-      console.log(data[0].nom);
-      test();
+      console.log("Requete: " + requete);
+      switch (requete) {
+        case "nom":
+          parVille();
+          break;
+        case "codePostal":
+          parCodePostal();
+          break;
+      }
     })
     .catch((error) => {
       console.error("There was a problem with the fetch operation: ", error);
     });
 }
 
-function test(cp) {
-  console.log("Ok 2");
+function parVille() {
+  console.log("Recherche par ville");
+}
+function parCodePostal() {
+  console.log("Recherche par code postal");
 }
