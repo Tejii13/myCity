@@ -41,15 +41,19 @@ donné.
 
 ## Exercice
 
-### Maquette
+### Fonctionnement
 
-J'ai mis un input dédié au code postal et un deuxième dédié à la ville. En écrivant le code postale, nous devrions avoir des propositions nous permettant d'y acceder directement. On pourra remplacer les codes postaux par des villes afin de remplir l'input dédié rapidement.
+J'ai mis un input dédié au code postal et un deuxième dédié à la ville. En écrivant le code postale, nous devrions avoir des propositions nous permettant d'y acceder directement. Le champ 'Ville', nous permet de directement écrire la ville et de choisir son code postale à l'aide d'un element 'select' si plusieur villes ont le même code. L'élément select ne s'affichera que si plusieurs villes ont le même nom, et disparaîtra après avoir selectionné un coe postal.
 
 ### Evenement JavaScript
 
-On utilisera un evenement "input" avec un addEventListener. Chaque fois que l'utilisateur écrit quoi que ce soit, les informations seront analysées. Quelque soit le champ rempli par l'utilisateur, on pourra lui donner une réponsE.
+On utilisera un evenement "input" avec un addEventListener. Chaque fois que l'utilisateur écrit quoi que ce soit, les informations seront analysées. Quelque soit le champ rempli par l'utilisateur, on pourra lui donner une réponse.
 
 ### Choix de l'API
 
 J'ai trouvé cet API qui semble correspondre à ce que l'on veut faire :
 <https://api.gouv.fr/les-api/api-geo>
+
+### Bugs connus
+
+- L'element 'select' #select_codePostal affiche les options en double
