@@ -160,44 +160,58 @@ function verificationCodePostal(data) {
   }
   // Récupération des codes postaux de villes ayant le même nom
   if (villesDoublons.length > 1) {
-    // On crée un élement option pour notre select
-    option = document.createElement("option");
-    // On le nomme choisir pour aider l'utilisateur
-    option.textContent = "Choisir";
-    // On l'ajoute à notre select
-    element.append(option);
-    // On parcours les données de l'api pour identifier les doublons
-    for (let i = 0; i < data.length; i++) {
-      let n = 0;
-      // On compare chaque entrée pour trouver un doublon
-      if (villesDoublons[n].toLowerCase() == data[i].nom.toLowerCase()) {
-        // On crée un élement option pour notre select
-        option = document.createElement("option");
-        // On lui ajoute le code postal du doublon en question
-        option.textContent = data[i].codesPostaux[0];
-        // On l'ajoute à notre select
-        element.append(option);
-        n++;
-      }
-    }
-    // On remet le select en invisible
-    element.style.visibility = "visible";
+    doublons(data, villesDoublons);
   } else {
-    // S'il n'y a pas de doublons
-    for (let i = 0; i < data.length; i++) {
-      // On cherche la ville correspondant à notre saisie
-      if (data[i].nom.toLowerCase() == input_ville.value.toLowerCase()) {
-        // On récupère son code postal
-        input_codePostal.value = data[i].codesPostaux[0];
-        break;
-      } else {
-        // On réinitialise l'input_codePosatl si aucune ville n'est trouvée
-        input_codePostal.value = "";
-      }
-    }
+    pasDeDoublons(data);
   }
   // On lance la fonction par ville
   parVille(data);
+}
+// On traite les doublons
+function doublons(data, villesDoublons) {
+  // Suppression des requêttes précédentes
+  while (element.hasChildNodes()) {
+    element.removeChild(element.lastChild);
+  }
+  // On crée un élement option pour notre select
+  option = document.createElement("option");
+  // On le nomme choisir pour aider l'utilisateur
+  option.textContent = "Choisir";
+  // On l'ajoute à notre select
+  element.append(option);
+  // On parcours les données de l'api pour identifier les doublons
+  for (let i = 0; i < data.length; i++) {
+    let n = 0;
+    // On compare chaque entrée pour trouver un doublon
+    if (villesDoublons[n].toLowerCase() == data[i].nom.toLowerCase()) {
+      // On crée un élement option pour notre select
+      option = document.createElement("option");
+      // On lui ajoute le code postal du doublon en question
+      option.textContent = data[i].codesPostaux[0];
+      // On l'ajoute à notre select
+      element.append(option);
+      n++;
+    }
+  }
+  // On remet le select en invisible
+  element.style.visibility = "visible";
+}
+// On récupère le code postal
+function pasDeDoublons(data) {
+  // On masque le select s'il n'y plus de doublons à la suite de la saisie
+  document.querySelector("#select_codePostal").style.visibility = "hidden";
+  // S'il n'y a pas de doublons
+  for (let i = 0; i < data.length; i++) {
+    // On cherche la ville correspondant à notre saisie
+    if (data[i].nom.toLowerCase() == input_ville.value.toLowerCase()) {
+      // On récupère son code postal
+      input_codePostal.value = data[i].codesPostaux[0];
+      break;
+    } else {
+      // On réinitialise l'input_codePosatl si aucune ville n'est trouvée
+      input_codePostal.value = "";
+    }
+  }
 }
 
 // On recherche parmi les villes
