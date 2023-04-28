@@ -1,6 +1,6 @@
 /*
-  Toutes les comparaisons entre chaînes de caarctères
-se font en les convertissant en miniscules de sorte à
+  Toutes les comparaisons entre chaînes de caractères
+se font en les convertissant en minuscules de sorte à
 comparer le contenu de celles-ci plutôt que la forme
 */
 
@@ -9,58 +9,83 @@ let apiUrl; // Lien utilisé pour questionner l'api
 let requete; // Type de recherche que l'on effectuera
 let contenant; // Contenu de l'input
 let option; // Variable qui sert à la création des datalist
+let isValid = new Boolean();
 
 // Attribution variables à chaque input
-const input_codePostal = document.querySelector("#input_codePostal");
-const input_ville = document.querySelector("#input_ville");
+const INPUT_CODEPOSTAL = document.querySelector("#input_codePostal");
+const INPUT_VILLE = document.querySelector("#input_ville");
+// On determine une variable pour le select qui permet de choisir un code postal si plusieurs sont disponibles pour des situations particulières
+let element = document.querySelector("#select_codePostal");
 
 // Identification informations écrites dans input_codePostal
-input_codePostal.addEventListener("input", checkCodePostal);
+INPUT_CODEPOSTAL.addEventListener("input", recupCodePostal);
 // Identification informations écrites dans input_ville
-input_ville.addEventListener("input", function () {
-  checkVille(event);
-});
+INPUT_VILLE.addEventListener("input", recupVille);
 // Vérification validité du code postal
-input_codePostal.addEventListener("blur", function (event) {
+INPUT_CODEPOSTAL.addEventListener("blur", function (event) {
   event.target.form.reportValidity();
 });
 
-//
 // Click sur le bouton
 document.querySelector("#accesInfos").addEventListener("click", function () {
   // On remplace les espaces par des undescores (convention de wikipedia)
-  contenant = input_ville.value.replaceAll(" ", "_");
+  contenant = INPUT_VILLE.value.replaceAll(" ", "_");
   // On redirige l'utilisateur vers la page wikipedia qu'elle existe ou pas
   window.location.href = `https://fr.wikipedia.org/wiki/${contenant}`;
 });
+// On vérifie s'il y a un changement dans l'element 'select'
+element.addEventListener("change", function () {
+  // On met la valeur choisie dans l'input_codePostal
+  INPUT_CODEPOSTAL.value = element.value;
+  // On repasse l'element en invisible
+  document.querySelector("#select_codePostal").style.visibility = "hidden";
+  // Suppression des requêtes précédentes
+  while (element.hasChildNodes()) {
+    element.removeChild(element.lastChild);
+  }
+});
 
-//
 // Préparation recherche par code postal
-function checkCodePostal(event) {
-  // On récupére ce qu'a écrit l'utilisateur
-  contenant = event.target.value;
-  // On détermine si on cherche par département ou par commune
-  switch (event.target.value.length) {
-    case 2:
-      // On détermine où on va chercher dans l'api
-      requete = "departement";
-      // On assigne l'url de l'api à une variable
-      apiUrl = `https://geo.api.gouv.fr/departements/${contenant}/communes`;
-      // On lance la fonction readApi()
-      readApi(apiUrl, requete);
-      break;
-    case 5:
-      // On détermine où on va chercher dans l'api
-      requete = "codePostal";
-      // On assigne l'url de l'api à une variable
-      apiUrl = `https://geo.api.gouv.fr/communes?codePostal=${contenant}`;
-      // On lance la fonction readApi()
-      readApi(apiUrl, requete);
-      break;
+function recupCodePostal(event) {
+  // On récupère ce qu'a écrit l'utilisateur
+  // Si l'objet renvoyé par l'api est vide, on considére que le code postal n'existe pas
+  if (INPUT_CODEPOSTAL.value >= 96 && INPUT_CODEPOSTAL.length == 2) {
+    // On remet l'input à zero
+    INPUT_CODEPOSTAL.value = "";
+    // On notifie que le département n'existe pas
+    INPUT_CODEPOSTAL.placeholder = "Ce département n'existe pas";
+  } else {
+    switch (event.target.value.length) {
+      case 2:
+        // On détermine où on va chercher dans l'api
+        requete = "departement";
+        contenant = INPUT_CODEPOSTAL.value;
+        // On assigne l'url de l'api à une variable
+        apiUrl = `https://geo.api.gouv.fr/departements/${contenant}/communes?fields=nom,codesPostaux`;
+        // On lance la fonction readApi()
+        readApi(apiUrl, requete);
+        break;
+      case 5:
+        // On détermine où on va chercher dans l'api
+        requete = "codePostal";
+        contenant = INPUT_CODEPOSTAL.value;
+        // On assigne l'url de l'api à une variable
+        apiUrl = `https://geo.api.gouv.fr/communes?codePostal=${contenant}&fields=nom,codesPostaux`;
+        // On lance la fonction readApi()
+        readApi(apiUrl, requete);
+        break;
+      default:
+        INPUT_VILLE.value = "";
+        while (element.hasChildNodes()) {
+          element.removeChild(element.lastChild);
+        }
+        document.querySelector("#select_codePostal").style.visibility =
+          "hidden";
+    }
   }
 }
 // Préparation de la recherche par ville
-function checkVille(event) {
+function recupVille(event) {
   // On récupére ce qu'a écrit l'utilisateur
   contenant = event.target.value;
   // On attend que l'utilisateur écrive deux lettres ou plus avant d'apeller l'api
@@ -70,9 +95,12 @@ function checkVille(event) {
     // On détermine ce qu'on va chercher dans l'api (on l'utilisera dans readApi())
     requete = "nom";
     // On assigne l'url de l'api à une variable
-    apiUrl = `https://geo.api.gouv.fr/communes?nom=${contenant}`;
+    apiUrl = `https://geo.api.gouv.fr/communes?nom=${contenant}&fields=nom,codesPostaux`;
     // On lance la fonction readApi()
     readApi(apiUrl, requete);
+  } else if (!isValid) {
+    // On remet l'input_codePostal à zéro s'il n'a pas été validé
+    INPUT_CODEPOSTAL.value = "";
   }
 }
 
@@ -90,30 +118,21 @@ function readApi(apiUrl, requete) {
       switch (requete) {
         // Recherche par nom de ville
         case "nom":
-          verificationCodePostal(data);
-          // input_codePostal.value = "";
-          // parVille(data);
+          verificationDoublons(data);
           break;
         // Recherche par numéro de département
         case "departement":
           // Si l'objet renvoyé par l'api est vide, on considére que le code postal n'existe pas
-          if (data.length === 0) {
-            // On remet l'input à zero
-            input_codePostal.value = "";
-            // On notifie que le département n'existe pas
-            input_codePostal.placeholder = "Ce département n'existe pas";
-          } else {
-            parDepartement(data);
-            break;
-          }
+          parDepartement(data);
+          break;
         // Recherche par code postal
         case "codePostal":
           // Si l'objet renvoyé par l'api est vide, on considére que le code postal n'existe pas
           if (data.length === 0) {
             // On remet l'input à zero
-            input_codePostal.value = "";
+            INPUT_CODEPOSTAL.value = "";
             // On notifie que le code postal n'existe pas
-            input_codePostal.placeholder = "Ce code postal n'existe pas";
+            INPUT_CODEPOSTAL.placeholder = "Ce code postal n'existe pas";
           } else {
             parCodePostal(data);
           }
@@ -125,24 +144,10 @@ function readApi(apiUrl, requete) {
     });
 }
 
-// On determine une variable pour le select qui permet de choisir un code postal si plusieurs sont disponibles pour des situations particulières
-let element = document.querySelector("#select_codePostal");
-// On vérifie s'il y a un changement dans l'element 'select'
-element.addEventListener("change", function () {
-  // On met la valeur choisie dans l'input_codePostal
-  input_codePostal.value = element.value;
-  // On repasse l'element en invisible
-  document.querySelector("#select_codePostal").style.visibility = "hidden";
-  // Suppression des requêttes précédentes
-  while (element.hasChildNodes()) {
-    element.removeChild(element.lastChild);
-  }
-});
-
 // On détermine le code postal d'une ville depuis son nom
-function verificationCodePostal(data) {
+function verificationDoublons(data) {
   // Déclaration variables locales
-  let villesDoublons = [];
+  let doublons = [];
   let n = 0;
   // Suppression des requêttes précédentes
   while (datalist_ville.hasChildNodes()) {
@@ -151,24 +156,24 @@ function verificationCodePostal(data) {
   // Recherche de villes ayant le même nom
   for (let i = 0; i < data.length; i++) {
     // On compare si le nom écrit dans input_ville est égal à ceux données par l'api
-    if (input_ville.value.toLowerCase() == data[i].nom.toLowerCase()) {
+    if (INPUT_VILLE.value.toLowerCase() == data[i].nom.toLowerCase()) {
       // On ajoute les villes correspondantes à notre liste
-      villesDoublons[n] = data[i].nom;
+      doublons[n] = data[i].nom;
       // On fera cela à chaque ville rencontrée
       n++;
     }
   }
   // Récupération des codes postaux de villes ayant le même nom
-  if (villesDoublons.length > 1) {
-    doublons(data, villesDoublons);
+  if (doublons.length > 1) {
+    villesDoublons(data, doublons);
   } else {
-    pasDeDoublons(data);
+    villesPasDoublons(data);
   }
   // On lance la fonction par ville
   parVille(data);
 }
 // On traite les doublons
-function doublons(data, villesDoublons) {
+function villesDoublons(data, Doublons) {
   // Suppression des requêttes précédentes
   while (element.hasChildNodes()) {
     element.removeChild(element.lastChild);
@@ -183,7 +188,7 @@ function doublons(data, villesDoublons) {
   for (let i = 0; i < data.length; i++) {
     let n = 0;
     // On compare chaque entrée pour trouver un doublon
-    if (villesDoublons[n].toLowerCase() == data[i].nom.toLowerCase()) {
+    if (Doublons[n].toLowerCase() == data[i].nom.toLowerCase()) {
       // On crée un élement option pour notre select
       option = document.createElement("option");
       // On lui ajoute le code postal du doublon en question
@@ -197,19 +202,19 @@ function doublons(data, villesDoublons) {
   element.style.visibility = "visible";
 }
 // On récupère le code postal
-function pasDeDoublons(data) {
+function villesPasDoublons(data) {
   // On masque le select s'il n'y plus de doublons à la suite de la saisie
   document.querySelector("#select_codePostal").style.visibility = "hidden";
   // S'il n'y a pas de doublons
   for (let i = 0; i < data.length; i++) {
     // On cherche la ville correspondant à notre saisie
-    if (data[i].nom.toLowerCase() == input_ville.value.toLowerCase()) {
+    if (data[i].nom.toLowerCase() == INPUT_VILLE.value.toLowerCase()) {
       // On récupère son code postal
-      input_codePostal.value = data[i].codesPostaux[0];
+      INPUT_CODEPOSTAL.value = data[i].codesPostaux[0];
       break;
-    } else {
-      // On réinitialise l'input_codePosatl si aucune ville n'est trouvée
-      input_codePostal.value = "";
+    } else if (!isValid) {
+      // On réinitialise l'input_codePosatl si aucune ville n'est trouvée et qu'il n'y a pas de code postal d'écrit
+      INPUT_CODEPOSTAL.value = "";
     }
   }
 }
@@ -266,7 +271,7 @@ function parDepartement(data) {
 }
 // On recherche parmi les codes postaux
 function parCodePostal(data) {
-  input_ville.value = "";
+  INPUT_VILLE.value = "";
   // Déclaration variables locales
   const datalist_ville = document.querySelector("#datalist_ville");
   const dataLength = data.length;
@@ -276,7 +281,8 @@ function parCodePostal(data) {
   }
 
   if (dataLength == 1) {
-    input_ville.value = data[0].nom;
+    INPUT_VILLE.value = data[0].nom;
+    isValid = true;
   } else {
     // Affichage dans une datalist les villes ayant ce code postal
     for (let i = 0; i < dataLength; i++) {
@@ -288,10 +294,13 @@ function parCodePostal(data) {
       datalist_ville.append(option);
     }
     // On remplace le placeholder
-    input_ville.placeholder = "Cliquez pour voir les villes";
+    INPUT_VILLE.placeholder = "Cliquez pour voir les villes";
     // On nomme la page en fonction du code postal choisi
-    document.title = input_codePostal.value;
+    document.title = INPUT_CODEPOSTAL.value;
     // On switch sur l'input ville automatiquement
-    input_ville.focus();
+    if (INPUT_CODEPOSTAL.value != "") {
+      INPUT_VILLE.focus();
+      isValid = true;
+    }
   }
 }
