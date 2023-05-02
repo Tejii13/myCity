@@ -15,7 +15,7 @@ let isValid = new Boolean();
 const INPUT_CODEPOSTAL = document.querySelector("#input_codePostal");
 const INPUT_VILLE = document.querySelector("#input_ville");
 // On determine une variable pour le select qui permet de choisir un code postal si plusieurs sont disponibles pour des situations particulières
-let element = document.querySelector("#select_codePostal");
+const element = document.querySelector("#select_codePostal");
 
 // Identification informations écrites dans input_codePostal
 INPUT_CODEPOSTAL.addEventListener("input", recupCodePostal);
